@@ -1,8 +1,12 @@
 package project.service;
 
+import lombok.extern.log4j.Log4j2;
 import project.domain.DeveloperCompany;
 import project.repository.DeveloperCompanyRepository;
 
+import java.util.List;
+
+@Log4j2
 public class DeveloperCompanyService {
     public static void insert(DeveloperCompany developerCompany) {
         DeveloperCompanyRepository.insert(developerCompany);
@@ -21,7 +25,22 @@ public class DeveloperCompanyService {
     public static void findAll() {
         DeveloperCompanyRepository.findAll();
     }
-    public static void findByName(DeveloperCompany developerCompany) {
-        DeveloperCompanyRepository.findByName(developerCompany);
+    public static List<DeveloperCompany> findByName(String name) {
+        return DeveloperCompanyRepository.findByName(name);
+    }
+
+    public static void showDCMetaData() {
+        DeveloperCompanyRepository.showDCMetaData();
+    }
+    public static void showDriverMetaData() {
+        DeveloperCompanyRepository.showDriverMetaData();
+    }
+
+    public static void showTypeScrollWorking() {
+        DeveloperCompanyRepository.showTypeScrollWorking();
+    }
+
+    public static List<DeveloperCompany> findByNameAndUpdate(String name) {
+        return DeveloperCompanyRepository.findByNameAndUpdate(name);
     }
 }
