@@ -13,10 +13,16 @@ public class ConnectionFactoryTest {
         //DeveloperCompany developerCompany = DeveloperCompany.builder().name("Valve").build();
         //DeveloperCompanyService.insert(developerCompany);
         //DeveloperCompanyService.findByName(DeveloperCompany.builder().name("iso").build());
-        //DeveloperCompanyService.findAll();
-        List<DeveloperCompany> valve = DeveloperCompanyService.findByNameAndUpdate("lv");
         //DeveloperCompanyService.showTypeScrollWorking();
-        log.info(valve);
+        //List<DeveloperCompany> valve = DeveloperCompanyService.findByNameAndUpdate("lv");
+        //DeveloperCompanyService.showTypeScrollWorking();
 
+        //List<DeveloperCompany> riotGomes = DeveloperCompanyService.findByNamePreparedStatement("ri");
+//        for (DeveloperCompany d : riotGomes) {
+//            System.out.println(d);
+//      }
+        DeveloperCompany dc = DeveloperCompany.builder().id(1).name("Riot Games").build();
+        DeveloperCompanyService.updatePreparedStatement(dc);
     }
 }
+

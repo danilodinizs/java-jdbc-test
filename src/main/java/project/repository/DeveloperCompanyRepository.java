@@ -80,6 +80,7 @@ public class DeveloperCompanyRepository {
                         .build();
                 dcList.add(dc);
             }
+
         } catch (SQLException e) {
             log.error("Error while trying to find all Developer Companies", e);
         }
@@ -150,7 +151,7 @@ public class DeveloperCompanyRepository {
         try (Connection connection = ConnectionFactory.getConnection();
              Statement stmt = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
              ResultSet resultSet = stmt.executeQuery(sql)) {
-            log.info(resultSet.first());
+            log.info(resultSet.last());
             log.info(DeveloperCompany.builder().id(resultSet.getInt("developer_companyid")).name(resultSet.getString("name")).build());
         } catch (SQLException e) {
             log.error("Error while trying to find all Developer Companies", e);
@@ -180,5 +181,96 @@ public class DeveloperCompanyRepository {
             log.error("Error while trying to find all Developer Companies", e);
         }
         return dcList;
+    }
+
+    public static List<DeveloperCompany> findByNameAndInsertIfNull(String name) {
+        log.info("Inserting Developer Company");
+        String sql = "SELECT developer_companyId, name FROM games_store.developer_company WHERE name LIKE '%%%s%%';"
+                .formatted(name);
+        List<DeveloperCompany> dcList = new ArrayList<>();
+        try (Connection connection = ConnectionFactory.getConnection();
+             Statement stmt = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+             ResultSet resultSet = stmt.executeQuery(sql)) {
+            if (resultSet.next()) return dcList;
+                resultSet.moveToInsertRow();
+                resultSet.updateString("name", name);
+                resultSet.insertRow();
+                resultSet.moveToCurrentRow();
+                resultSet.beforeFirst();
+                resultSet.next();
+                DeveloperCompany dc = DeveloperCompany
+                        .builder()
+                        .id(resultSet.getInt("developer_companyid"))
+                        .name(resultSet.getString("name"))
+                        .build();
+                dcList.add(dc);
+
+
+        } catch (SQLException e) {
+            log.error("Error while trying to find all Developer Companies", e);
+        }
+        return dcList;
+    }
+    public static List<DeveloperCompany> findByNameAndDelete(String name) {
+        log.info("Deleting Developer Company");
+        String sql = "SELECT developer_companyId, name FROM games_store.developer_company WHERE name LIKE '%s';"
+                .formatted(name);
+        List<DeveloperCompany> dcList = new ArrayList<>();
+        try (Connection connection = ConnectionFactory.getConnection();
+             Statement stmt = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+             ResultSet resultSet = stmt.executeQuery(sql)) {
+            if (resultSet.next()) resultSet.deleteRow();
+
+
+        } catch (SQLException e) {
+            log.error("Error while trying to find all Developer Companies", e);
+        }
+        return dcList;
+    }
+
+    public static List<DeveloperCompany> findByNamePreparedStatement(String name) {
+        String sql = "SELECT developer_companyId, name FROM games_store.developer_company WHERE name LIKE ?;";
+        log.info("Finding Developer company mentioned");
+        List<DeveloperCompany> dcList = new ArrayList<>();
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement ps = createPreparedStatement(connection, sql, name);
+             ResultSet resultSet = ps.executeQuery()) {
+
+            while (resultSet.next()) {
+                DeveloperCompany dc = DeveloperCompany
+                        .builder()
+                        .id(resultSet.getInt("developer_companyid"))
+                        .name(resultSet.getString("name"))
+                        .build();
+                dcList.add(dc);
+            }
+
+        } catch (SQLException e) {
+            log.error("Error while trying to find all Developer Companies", e);
+        }
+        return dcList;
+    }
+
+    private static PreparedStatement createPreparedStatement(Connection connection, String sql, String name) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, String.format("%%%s%%", name) );
+        return ps;
+    }
+
+    public static void updatePreparedStatement(DeveloperCompany developerCompany) {
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement ps = preparedStatementUpdate(connection, developerCompany)) {
+            int rowsAffected = ps.executeUpdate();
+            log.info("Updated Developer Company '{}', rows affected '{}'", developerCompany.getId(), rowsAffected);
+        } catch (SQLException e) {
+            log.error("Error while trying to update Developer Company '{}'", developerCompany.getId(), e);
+        }
+    }
+    private static PreparedStatement preparedStatementUpdate(Connection connection, DeveloperCompany developerCompany) throws SQLException {
+        String sql = "UPDATE `games_store`.`developer_company` SET `name` = ? WHERE (`developer_companyID` = ?);";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, developerCompany.getName());
+        ps.setInt(2,  developerCompany.getId());
+        return ps;
     }
 }
