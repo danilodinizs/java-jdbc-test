@@ -7,6 +7,7 @@ import project.connection.ConnectionFactory;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 @Log4j2
 public class DeveloperCompanyRepository {
@@ -65,7 +66,7 @@ public class DeveloperCompanyRepository {
         }
     }
     public static List<DeveloperCompany> findByName(String name) {
-        String sql = "SELECT developer_companyId, name FROM games_store.developer_company WHERE name LIKE '%%%s%%';"
+        String sql = "CALL `games_store`.`sp_get_devcompany_by_name`('%%%s%%');"
                 .formatted(name);
         log.info("Finding Developer company mentioned");
         List<DeveloperCompany> dcList = new ArrayList<>();
@@ -272,5 +273,35 @@ public class DeveloperCompanyRepository {
         ps.setString(1, developerCompany.getName());
         ps.setInt(2,  developerCompany.getId());
         return ps;
+    }
+    public static List<DeveloperCompany> findByNameCallableStatement(String name) {
+        log.info("Finding Developer company mentioned");
+        List<DeveloperCompany> dcList = new ArrayList<>();
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement ps = createCallableStatement(connection, name);
+             ResultSet resultSet = ps.executeQuery()) {
+
+            while (resultSet.next()) {
+                DeveloperCompany dc = DeveloperCompany
+                        .builder()
+                        .id(resultSet.getInt("developer_companyid"))
+                        .name(resultSet.getString("name"))
+                        .build();
+                dcList.add(dc);
+            }
+
+        } catch (SQLException e) {
+            log.error("Error while trying to find all Developer Companies", e);
+        }
+        return dcList;
+    }
+    private static PreparedStatement createCallableStatement(Connection connection, String name) throws SQLException {
+        String sql = "CALL `games_store`.`sp_get_devcompany_by_name`(?);";
+        CallableStatement cs = connection.prepareCall(sql);
+        cs.setString(1, String.format("%%%s%%", name));
+        return cs;
+    }
+    public static void logr() {
+        log.info("test");
     }
 }

@@ -56,4 +56,8 @@ public class DeveloperCompanyService {
     public static List<DeveloperCompany> findByNamePreparedStatement(String name) {
         return DeveloperCompanyRepository.findByNamePreparedStatement(name);
     }
+    public static List<DeveloperCompany>  findByNameCallableStatement(String name) {
+        return DeveloperCompanyRepository.findByNameCallableStatement(name);
+    }
+
 }
