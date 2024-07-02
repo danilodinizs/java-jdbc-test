@@ -22,6 +22,30 @@ public class DeveloperCompanyRepository {
         }
     }
 
+    public static void saveTransaction(List<DeveloperCompany> developerCompany) {
+        try (Connection connection = ConnectionFactory.getConnection()) {
+            connection.setAutoCommit(false);
+            preparedStatementSaveTransaction(connection, developerCompany);
+            connection.commit();
+        } catch (SQLException e) {
+            log.error("Error while trying to update Developer Company '{}'", developerCompany, e);
+        }
+    }
+
+    private static void preparedStatementSaveTransaction(Connection connection, List<DeveloperCompany> developerCompany) throws SQLException {
+        String sql = "INSERT INTO `games_store`.`developer_company` (`name`) VALUES (?);";
+        for (DeveloperCompany dc : developerCompany) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                log.info("Saving producer '{}'", dc.getName());
+                ps.setString(1, dc.getName());
+                ps.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
     public static void delete(DeveloperCompany developerCompany) {
         String sql = "DELETE FROM `games_store`.`developer_company` WHERE (`developer_companyid` = '%d');".formatted(developerCompany.getId());
         try (Connection connection = ConnectionFactory.getConnection();

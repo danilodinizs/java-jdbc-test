@@ -5,6 +5,7 @@ import project.connection.ConnectionFactory;
 import project.domain.DeveloperCompany;
 import project.listener.CustomRowSetListener;
 
+import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.JdbcRowSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -47,9 +48,26 @@ public class DeveloperCompanyRepositoryRS {
             e.printStackTrace();
         }
     }
+    public static void updateCachedRowSet(DeveloperCompany developerCompany) {
+        String sql = "SELECT * FROM `games_store`.`developer_company` WHERE (`developer_companyID` = ?);";
+        try(CachedRowSet crs = ConnectionFactory.getCachedRowSet();
+        Connection conn = ConnectionFactory.getConnection()) {
+            conn.setAutoCommit(true);
+            crs.addRowSetListener(new CustomRowSetListener());
+            crs.setCommand(sql);
+            crs.setInt(1, developerCompany.getId());
+            crs.execute(conn);
+            if(!crs.next()) return;
+            crs.updateString("name", developerCompany.getName());
+            crs.updateRow();
+            crs.acceptChanges();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
-        DeveloperCompany developerCompany = DeveloperCompany.builder().id(1).name("Riot Gomes").build();
-        updateJdbcRowSet(developerCompany);
+        DeveloperCompany developerCompany = DeveloperCompany.builder().id(1).name("Riot Games").build();
+        updateCachedRowSet(developerCompany);
     }
 }

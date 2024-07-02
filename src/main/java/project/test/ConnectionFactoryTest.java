@@ -3,6 +3,7 @@ package project.test;
 import project.domain.DeveloperCompany;
 import lombok.extern.log4j.Log4j2;
 import project.connection.ConnectionFactory;
+import project.repository.DeveloperCompanyRepository;
 import project.repository.DeveloperCompanyRepositoryRS;
 
 import java.sql.*;
@@ -27,9 +28,12 @@ public class ConnectionFactoryTest {
 //        for (DeveloperCompany d : riotGomes) {
 //            System.out.println(d);
 //      }
-        //DeveloperCompany dc = DeveloperCompany.builder().id(1).name("Riot Games").build();
+        DeveloperCompany dc1 = DeveloperCompany.builder().name("Valve").build();
+        DeveloperCompany dc2 = DeveloperCompany.builder().name("Mojang").build();
+        DeveloperCompany dc3 = DeveloperCompany.builder().name("Blizzard").build();
+
         //DeveloperCompanyService.updatePreparedStatement(dc);
-        log.info(DeveloperCompanyRepositoryRS.findByNameJdbcRowSet("ck"));
+        DeveloperCompanyRepository.saveTransaction(List.of(dc1, dc2, dc3));
     }
 }
 
